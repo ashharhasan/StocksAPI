@@ -13,4 +13,19 @@ namespace api.Dtos.Stock
         public decimal Price { get; set; }
 
     }
+    public class CreateStockReqDto
+    {
+        public string Symbol { get; set; }= string.Empty;
+        public string CompanyName { get; set; } = string.Empty;
+        public decimal Price { get; set; }
+
+    }
+
+    public class UpdateStockReqDto
+    {
+        public string Symbol { get; set; }= string.Empty;
+        public string CompanyName { get; set; } = string.Empty;
+        public decimal Price { get; set; }
+
+    }
 }

@@ -47,24 +47,32 @@ namespace api.Controllers
             _context.SaveChanges();
             return CreatedAtAction(nameof(GetById), new { id = stock.Id }, stock.ToDto());
         }
+        [HttpPut("{id}")]
+        public IActionResult Update([FromRoute]int id, [FromBody]UpdateStockReqDto stockRequest)
+        {
+            var stock = _context.Stocks.FirstOrDefault(s => s.Id == id);
+            if (stock == null)
+            {
+                return NotFound();
+            }
+            stock.Symbol = stockRequest.Symbol;
+            stock.CompanyName = stockRequest.CompanyName;
+            stock.Price = stockRequest.Price;
+            _context.SaveChanges();
+            return Ok(stock.ToDto());
+        }
 
-        // public IActionResult Create(Stock stock)
-        // {
-        //     var createdStock = context.Stocks.Add(stock);
-        //     context.SaveChanges();
-        //     return CreatedAtAction(nameof(GetById), new { id = createdStock.Entity.Id }, createdStock.Entity);
-        // }
-        // public IActionResult Update(int id, Stock stock)
-        // {
-        //     context.Stocks.Update(stock);
-        //     context.SaveChanges();
-        //     return NoContent();
-        // }
-        // public IActionResult Delete(int id)
-        // {
-        //     context.Stocks.Remove(new Stock { Id = id });
-        //     context.SaveChanges();
-        //     return NoContent();
-        // }
+        [HttpDelete("{id}")]
+        public IActionResult Delete(int id)
+        {
+            var stock = _context.Stocks.FirstOrDefault(s => s.Id == id);
+            if (stock == null)
+            {
+                return NotFound();
+            }
+            _context.Stocks.Remove(stock);
+            _context.SaveChanges();
+            return NoContent();
+        }
     }
 }
