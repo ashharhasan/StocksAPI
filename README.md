@@ -1,3 +1,1 @@
-This project is made to follow the modern best practices of a .NET web API.
-
-Tech Stack: C#, .NET 8
+This project is made to follow the modern best practices of a .NET web API. Programming language is c# with .NET 8 framework as this is the latest stable version. Secondly, Entity framework is used with Postgre SQL because Microsoft SQL Server can't be installed directly on mac and also because Postgre SQl is trendy :)
