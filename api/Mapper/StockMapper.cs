@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using api.Dtos.Stock;
+using api.Models;
 
 namespace api.Mapper
 {
@@ -16,6 +17,16 @@ namespace api.Mapper
                 Symbol = stock.Symbol,
                 CompanyName = stock.CompanyName,
                 Price = stock.Price
+            };
+        }
+
+        public static Stock ToModel(this CreateStockReqDto stockReq)
+        {
+            return new Stock
+            {
+                Symbol = stockReq.Symbol,
+                CompanyName = stockReq.CompanyName,
+                Price = stockReq.Price
             };
         }
     }
