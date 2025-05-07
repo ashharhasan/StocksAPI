@@ -29,7 +29,7 @@ namespace api.Mapper
                 Price = stockReq.Price
             };
         }
-         public static Stock ToModel(this UpdateStockReqDto stockReq)
+        public static Stock ToModel(this UpdateStockReqDto stockReq)
         {
             return new Stock
             {

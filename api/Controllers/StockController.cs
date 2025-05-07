@@ -6,6 +6,7 @@ using api.Data;
 using api.Dtos.Stock;
 using api.Mapper;
 using api.Models;
+using api.Repository;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -16,23 +17,25 @@ namespace api.Controllers
     public class StockController: ControllerBase
     {
         private readonly ApplicationDBContext _context;
+        private readonly StockRepository _stockRepo;
 
         public StockController(ApplicationDBContext context)
         {
             _context = context;
+            _stockRepo = new StockRepository(context);
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var stocks = await _context.Stocks.ToListAsync();
-            return Ok(stocks.Select(s=> s.ToDto()));
+            var stocks = await _stockRepo.GetAllAsync();
+            return Ok(stocks);
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
-            var stock = await _context.Stocks.FirstOrDefaultAsync(s => s.Id == id);
+            var stock = await _stockRepo.GetByIdAsync(id);
             if (stock == null)
             {
                 return NotFound();
@@ -43,11 +46,15 @@ namespace api.Controllers
         [HttpPost]
         public async Task<IActionResult> Create ([FromBody] CreateStockReqDto stockRequest)
         {
-            var stock = stockRequest.ToModel();
-            await _context.Stocks.AddAsync(stock);
-            await _context.SaveChangesAsync();
-            return CreatedAtAction(nameof(GetById), new { id = stock.Id }, stock.ToDto());
+            var createdStock = await _stockRepo.CreateAsync(stockRequest);
+            if (createdStock == null)
+            {
+                return BadRequest();
+            }
+            
+            return CreatedAtAction(nameof(GetById), new { id = createdStock.Id }, createdStock.ToDto());
         }
+        
         [HttpPut("{id}")]
         public async Task<IActionResult> Update([FromRoute]int id, [FromBody]UpdateStockReqDto stockRequest)
         {
