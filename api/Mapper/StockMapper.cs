@@ -29,5 +29,20 @@ namespace api.Mapper
                 Price = stockReq.Price
             };
         }
+        public static Stock ToModel(this UpdateStockReqDto stockReq)
+        {
+            return new Stock
+            {
+                Symbol = stockReq.Symbol,
+                CompanyName = stockReq.CompanyName,
+                Price = stockReq.Price
+            };
+        }
+        public static void CopyFrom(this Stock stock, UpdateStockReqDto stockReq)
+        {
+            stock.Symbol = stockReq.Symbol;
+            stock.CompanyName = stockReq.CompanyName;
+            stock.Price = stockReq.Price;
+        }
     }
 }
