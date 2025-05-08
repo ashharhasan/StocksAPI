@@ -52,11 +52,11 @@ namespace api.Repository
             {
                 return null;
             }
-            var updatedStock = stockRequest.ToModel();
-            _context.Update(updatedStock);
+            stock.CopyFrom(stockRequest);
+            _context.Update(stock);
             await _context.SaveChangesAsync();
 
-            return updatedStock;
+            return stock;
         }
 
         public async Task<Stock?> DeleteAsync(int id)

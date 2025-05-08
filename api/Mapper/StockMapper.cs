@@ -38,5 +38,11 @@ namespace api.Mapper
                 Price = stockReq.Price
             };
         }
+        public static void CopyFrom(this Stock stock, UpdateStockReqDto stockReq)
+        {
+            stock.Symbol = stockReq.Symbol;
+            stock.CompanyName = stockReq.CompanyName;
+            stock.Price = stockReq.Price;
+        }
     }
 }

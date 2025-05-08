@@ -1,14 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using api.Data;
 using api.Dtos.Stock;
+using api.Interfaces;
 using api.Mapper;
-using api.Models;
-using api.Repository;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace api.Controllers
 {
@@ -16,15 +10,12 @@ namespace api.Controllers
     [ApiController]
     public class StockController: ControllerBase
     {
-        private readonly ApplicationDBContext _context;
-        private readonly StockRepository _stockRepo;
+        private readonly IStockRepository _stockRepo;
 
-        public StockController(ApplicationDBContext context)
+        public StockController(IStockRepository stockRepo)
         {
-            _context = context;
-            _stockRepo = new StockRepository(context);
+            _stockRepo = stockRepo;
         }
-
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
@@ -54,32 +45,27 @@ namespace api.Controllers
             
             return CreatedAtAction(nameof(GetById), new { id = createdStock.Id }, createdStock.ToDto());
         }
-        
+
         [HttpPut("{id}")]
         public async Task<IActionResult> Update([FromRoute]int id, [FromBody]UpdateStockReqDto stockRequest)
         {
-            var stock = await _context.Stocks.FirstOrDefaultAsync(s => s.Id == id);
+
+            var stock = await _stockRepo.UpdateAsync(id,stockRequest);
             if (stock == null)
             {
                 return NotFound();
             }
-            stock.Symbol = stockRequest.Symbol;
-            stock.CompanyName = stockRequest.CompanyName;
-            stock.Price = stockRequest.Price;
-            await _context.SaveChangesAsync();
             return Ok(stock.ToDto());
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            var stock = await _context.Stocks.FirstOrDefaultAsync(s => s.Id == id);
+            var stock = await _stockRepo.DeleteAsync(id);
             if (stock == null)
             {
                 return NotFound();
             }
-            _context.Stocks.Remove(stock);
-            await _context.SaveChangesAsync();
             return NoContent();
         }
     }
