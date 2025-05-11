@@ -13,8 +13,8 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<ApplicationDBContext>(
     options => options.UseNpgsql(builder.Configuration.GetConnectionString("StocksDBConnection"))
     );
-builder.Services.AddScoped<StockRepository>();
-
+builder.Services.AddScoped<IStockRepository,StockRepository>();
+builder.Services.AddScoped<ICommentRepository,CommentRepository>();
 
 var app = builder.Build();
 
@@ -30,4 +30,3 @@ app.MapControllers();
 
 
 app.Run();
-
