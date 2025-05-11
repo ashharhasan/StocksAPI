@@ -19,14 +19,21 @@ namespace api.Repository
         {
             _context = context;
         }
-
-        
-
         public async Task<List<Stock>> GetAllAsync()
         {
             var stocks = await _context.Stocks.Include(c=>c.Comments).ToListAsync();
             return stocks;
         }
+
+        public async Task<List<StockDto>> GreaterThan(int value)
+        {
+            var temp = _context.Stocks.Include(c=>c.Comments).AsQueryable();
+
+            var stocks = await temp.Where(x=> x.Price > value).Select(x=> x.ToDto()).ToListAsync();
+
+            return stocks;
+        }
+
         public async Task<Stock?> GetByIdAsync(int id)
         {
             var stock = await _context.Stocks.Include(c=>c.Comments).FirstOrDefaultAsync(s => s.Id == id);

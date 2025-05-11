@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -16,13 +17,23 @@ namespace api.Dtos.Comment
     }
     public class CommentCreateRequest
     {
+        [Required]
+        [MaxLength(20,ErrorMessage ="Title can't be gretar than 20 characters")]
         public string Title { get; set; } = string.Empty;
+
+        [Required]
+        [MinLength(10,ErrorMessage = "Comment can't be less than 10 characters")]
         public string Content { get; set; } = string.Empty;
     }
 
     public class CommentUpdateRequest
     {
+        [Required]
+        [MaxLength(20,ErrorMessage ="Title can't be gretar than 20 characters")]
         public string Title { get; set; } = string.Empty;
+        
+        [Required]
+        [MinLength(10,ErrorMessage = "Comment can't be less than 10 characters")]
         public string Content { get; set; } = string.Empty;
     }
     

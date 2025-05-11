@@ -11,6 +11,7 @@ namespace api.Interfaces
     public interface IStockRepository
     {
         public Task<List<Stock>> GetAllAsync();
+        public Task<List<StockDto?>> GreaterThan(int value);
         public Task<Stock?> GetByIdAsync(int id);
         public Task<Stock?> CreateAsync(CreateStockReqDto stockRequest);
         public Task<Stock?> UpdateAsync(int id, UpdateStockReqDto stockRequest);

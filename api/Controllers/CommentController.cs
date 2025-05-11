@@ -43,6 +43,10 @@ namespace api.Controllers
         [HttpPost("{stockId}")]
         public async Task<IActionResult> Create ([FromRoute] int stockId,[FromBody] CommentCreateRequest commentCreateRequest)
         {
+            // if(!ModelState.IsValid)
+            // {
+            //     return ValidationProblem();
+            // }
             var comment = await _commentRepo.CreateAsync(stockId,commentCreateRequest);
 
             if(comment == null)
