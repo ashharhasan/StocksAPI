@@ -4,11 +4,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using api.Data;
 using api.Dtos.Stock;
+using api.Helpers;
 using api.Interfaces;
 using api.Mapper;
 using api.Models;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Dynamic.Core;
 
 namespace api.Repository
 {
@@ -19,24 +20,61 @@ namespace api.Repository
         {
             _context = context;
         }
-        public async Task<List<Stock>> GetAllAsync()
+        public async Task<List<Stock>> GetAllAsync(QueryObject queryObject)
         {
-            var stocks = await _context.Stocks.Include(c=>c.Comments).ToListAsync();
-            return stocks;
+            var stocks = _context.Stocks.Include(c => c.Comments).AsQueryable();
+
+            if (!String.IsNullOrWhiteSpace(queryObject.CompanyName))
+            {
+                stocks = stocks.Where(x => EF.Functions.ILike(x.CompanyName, $"%{queryObject.CompanyName}%"));
+            }
+            if (queryObject.Price != null)
+            {
+                stocks = stocks.Where(x => x.Price < queryObject.Price);
+            }
+            if (queryObject.SortBy != null)
+            {
+                // Step 1: Validate the sort field exists
+                var property = typeof(Stock).GetProperty(queryObject.SortBy);
+                if (property == null)
+                    queryObject.SortBy = "Id"; // Fallback to default
+
+                // Step 2: Use a switch expression (no null checks in the expression tree)
+                stocks = queryObject.SortBy switch
+                {
+                    "CompanyName" => queryObject.IsDescending
+                        ? stocks.OrderByDescending(x => x.CompanyName, StringComparer.OrdinalIgnoreCase)
+                        : stocks.OrderBy(x => x.CompanyName, StringComparer.OrdinalIgnoreCase),
+                    "Symbol" => queryObject.IsDescending
+                        ? stocks.OrderByDescending(x => x.Symbol)
+                        : stocks.OrderBy(x => x.Symbol),
+                    "Price" => queryObject.IsDescending
+                    ? stocks.OrderByDescending(x => x.Price)
+                    : stocks.OrderBy(x => x.Price),
+                    _ => queryObject.IsDescending
+                    ? stocks.OrderByDescending(x => x.Id)
+                    : stocks.OrderBy(x => x.Id)
+                };
+            }
+
+            int skipNumber = (queryObject.PageNumber -1) * queryObject.PageSize;
+            stocks= stocks.Skip(skipNumber).Take(queryObject.PageSize);
+
+            return await stocks.ToListAsync();
         }
 
         public async Task<List<StockDto>> GreaterThan(int value)
         {
-            var temp = _context.Stocks.Include(c=>c.Comments).AsQueryable();
+            var temp = _context.Stocks.Include(c => c.Comments);
 
-            var stocks = await temp.Where(x=> x.Price > value).Select(x=> x.ToDto()).ToListAsync();
+            var stocks = await temp.Where(x => x.Price > value).Select(x => x.ToDto()).ToListAsync();
 
             return stocks;
         }
 
         public async Task<Stock?> GetByIdAsync(int id)
         {
-            var stock = await _context.Stocks.Include(c=>c.Comments).FirstOrDefaultAsync(s => s.Id == id);
+            var stock = await _context.Stocks.Include(c => c.Comments).FirstOrDefaultAsync(s => s.Id == id);
             return stock;
         }
 
@@ -68,7 +106,7 @@ namespace api.Repository
 
         public async Task<Stock?> DeleteAsync(int id)
         {
-            var stock = await _context.Stocks.Include(c=> c.Comments).FirstOrDefaultAsync(s => s.Id == id);
+            var stock = await _context.Stocks.Include(c => c.Comments).FirstOrDefaultAsync(s => s.Id == id);
             if (stock == null)
             {
                 return null;
