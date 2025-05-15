@@ -16,5 +16,7 @@ namespace api.Models
         public decimal Price { get; set; }
 
         public List<Comment> Comments { get; set; } = new List<Comment>();
+
+        public List<Portfolio> portfolios { get; set; } = new List<Portfolio>();
     }
 }
