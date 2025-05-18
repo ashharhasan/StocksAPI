@@ -33,11 +33,30 @@ namespace api.Controllers
         public async Task<IActionResult> GetAllPortfolio()
         {
             var username = User.GetUserName();
-            // var username = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var appUser= await _userManager.FindByNameAsync(username);
             var userPortfolio = await _portfolioRepo.GetUserPortfolioAsync(appUser);
             return Ok(userPortfolio);
 
+        }
+
+        [HttpPost("{Symbol}")]
+        public async Task<IActionResult> CreatePortfolio([FromRoute]string Symbol)
+        {
+            var username = User.GetUserName();
+            var appUser= await _userManager.FindByNameAsync(username);
+
+            if(appUser == null)
+            {
+                return Unauthorized("Can't find the current User Id");
+            }
+
+            var createdPortfolio = await _portfolioRepo.CreatePortfolioAsync(appUser.Id,Symbol);
+
+            if(createdPortfolio == null)
+            {
+                return NotFound(Symbol);
+            }
+            return Ok("Portfolio Created");
         }
     }
 }
