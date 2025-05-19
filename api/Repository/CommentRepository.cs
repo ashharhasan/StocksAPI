@@ -6,6 +6,7 @@ using api.Data;
 using api.Dtos.Comment;
 using api.Interfaces;
 using api.Mapper;
+using api.Migrations;
 using api.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -22,7 +23,7 @@ namespace api.Repository
 
         public async Task<List<Comment>> GetAllAsync()
         {
-            var comments = await _context.Comments.ToListAsync();
+            var comments = await _context.Comments.Include(a=>a.CreatedBy).ToListAsync();
             return comments;
         }
 
@@ -41,7 +42,7 @@ namespace api.Repository
 
         public async Task<Comment?> GetByIdAsync(int id)
         {
-            var comment = await _context.Comments.FirstOrDefaultAsync(x => x.Id == id);
+            var comment = await _context.Comments.Include(a=>a.CreatedBy).FirstOrDefaultAsync(x => x.Id == id);
             return comment;
         }
 

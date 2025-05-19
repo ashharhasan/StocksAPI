@@ -17,7 +17,8 @@ namespace api.Mapper
                 StockId = comment.StockId,
                 Title = comment.Title,
                 Content = comment.Content,
-                CreatedAt = comment.CreatedAt
+                CreatedAt = comment.CreatedAt,
+                CreatedBy = comment.CreatedBy.UserName
             };
         }
         public static Comment ToModel(this CommentUpdateRequest commentUpdateRequest, int stockID)
@@ -27,7 +28,8 @@ namespace api.Mapper
                 StockId = stockID,
                 Title = commentUpdateRequest.Title,
                 Content = commentUpdateRequest.Content,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.UtcNow,
+                AppUserId = commentUpdateRequest.AppUserId
             };
         }
         public static Comment ToModel(this CommentCreateRequest commentUpdateRequest, int stockId)
@@ -37,7 +39,8 @@ namespace api.Mapper
                 StockId = stockId,
                 Title = commentUpdateRequest.Title,
                 Content = commentUpdateRequest.Content,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.UtcNow,
+                AppUserId = commentUpdateRequest.AppUserId
             };
         }
         public static Comment CopyTo(this CommentUpdateRequest commentUpdateRequest, Comment comment)
@@ -45,6 +48,7 @@ namespace api.Mapper
             comment.Title = commentUpdateRequest.Title;
             comment.Content = commentUpdateRequest.Content;
             comment.CreatedAt = DateTime.UtcNow;
+            comment.AppUserId= commentUpdateRequest.AppUserId;
             return comment;
         }
     }
