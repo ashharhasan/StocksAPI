@@ -40,6 +40,7 @@ namespace api.Controllers
         }
 
         [HttpPost("{Symbol}")]
+        [Authorize]
         public async Task<IActionResult> CreatePortfolio([FromRoute]string Symbol)
         {
             var username = User.GetUserName();
@@ -50,6 +51,13 @@ namespace api.Controllers
                 return Unauthorized("Can't find the current User Id");
             }
 
+            var userPortfolio = await _portfolioRepo.GetUserPortfolioAsync(appUser);
+
+            if(userPortfolio.Any(x=> x.Symbol.ToLower() == Symbol.ToLower()))
+            {
+                return BadRequest("This stock is already available to this user");
+            }
+
             var createdPortfolio = await _portfolioRepo.CreatePortfolioAsync(appUser.Id,Symbol);
 
             if(createdPortfolio == null)
@@ -57,6 +65,26 @@ namespace api.Controllers
                 return NotFound(Symbol);
             }
             return Ok("Portfolio Created");
+        }
+
+        [HttpDelete("{Symbol}")]
+        [Authorize]
+        public async Task<IActionResult?> DeletePortfolio ([FromRoute]string Symbol)
+        {
+            var username = User.GetUserName();
+            var appUser = await _userManager.FindByNameAsync(username);
+            if(appUser == null)
+            {
+                return Unauthorized("Can't find the current User Id");
+            }
+
+            var portfolio = await _portfolioRepo.DeletePortfolioAsync(appUser.Id, Symbol);
+
+            if(portfolio == null)
+            {
+                return NotFound("Can't delete, Stock not found");
+            }
+            return Ok("Portfolio deleted");
         }
     }
 }

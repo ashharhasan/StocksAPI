@@ -24,6 +24,7 @@ namespace api.Repository
             {
                 return null;
             }
+
             var portfolio = new Portfolio
             {
                 AppUserId = UserId,
@@ -31,6 +32,25 @@ namespace api.Repository
             };
 
             _context.portfolios.Add(portfolio);
+            await _context.SaveChangesAsync();
+
+            return portfolio;
+        }
+
+        public async Task<Portfolio?> DeletePortfolioAsync(string UserId, string Symbol)
+        {
+            var stock = await _context.Stocks.FirstOrDefaultAsync(x => x.Symbol.ToLower() == Symbol.ToLower());
+            if (stock == null)
+            {
+                return null;
+            }
+            var portfolio = new Portfolio
+            {
+                AppUserId = UserId,
+                StockId = stock.Id
+            };
+
+            _context.portfolios.Remove(portfolio);
             await _context.SaveChangesAsync();
 
             return portfolio;
