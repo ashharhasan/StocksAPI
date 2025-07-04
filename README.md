@@ -37,24 +37,24 @@ A production-ready backend with PostgreSQL, Docker, and JWT auth — built for l
 
 ### Run Locally
 
-Clone the repo:
+1. Clone the repo:
 
 ```bash
 git clone https://github.com/your-username/your-repo.git<br>
 cd your-repo
-'''
+```
 
-Configure PostgreSQL:
+2. Configure PostgreSQL:
 
 Update `appsettings.json` with your connection string.
 
-Run migrations:
+3. Run migrations:
 
 ```bash
 dotnet ef database update
 ```
 
-Start the API:
+4. Start the API:
 
 ```bash
 dotnet run
