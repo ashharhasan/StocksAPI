@@ -3,3 +3,4 @@ api/obj/
 bin/
 obj/
 .vscode/
+appsettings.Development.json

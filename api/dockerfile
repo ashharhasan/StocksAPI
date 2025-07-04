@@ -1,0 +1,23 @@
+# Stage 1: Build (uses SDK to compile and publish)
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /src
+
+# Copy project file(s) first (better layer caching)
+COPY ["api.csproj", "."]
+RUN dotnet restore "api.csproj"
+
+# Copy everything else and publish
+COPY . .
+RUN dotnet publish -c Release -o /app
+
+# Stage 2: Runtime (smaller, no SDK)
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
+WORKDIR /app
+COPY --from=build /app .
+
+# Explicitly expose port
+EXPOSE 80
+# Set environment to Development
+ENV ASPNETCORE_ENVIRONMENT=Development
+
+ENTRYPOINT ["dotnet", "api.dll"]
