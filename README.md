@@ -16,7 +16,7 @@ A production-ready backend with PostgreSQL, Docker, and JWT auth — built for l
 - ✅ **JWT Authentication** – Secure auth via `JsonWebTokenHandler`.
 - ✅ **Docker Support 📦** – Containerized and confirmed working on port `8080`.
 - ✅ **Swagger Docs** – Interactive API testing.
-- ✅ **XUnit Tests** – Unit testing.
+- ✅ **XUnit Tests** – Unit testing using Shouldly and FakeItEasy.
 ---
 
 ## 🚧 Upcoming Features (Planned for Learning!)
