@@ -7,7 +7,7 @@ using api.Dtos.Comment;
 using api.Interfaces;
 using api.Models;
 using FakeItEasy;
-using FluentAssertions;
+using Shouldly;
 using Microsoft.AspNetCore.Mvc;
 using Xunit;
 
@@ -19,80 +19,141 @@ namespace api.Tests.Controllers
         //SUT
         private readonly CommentController commentController;
 
+        private readonly List<Comment> comments;
+
+        private readonly Comment comment;
+
         public CommentControllerTests()
         {
             commentRepo = A.Fake<ICommentRepository>();
-            commentController = A.Fake<CommentController>();
+            commentController = new CommentController(commentRepo);
+            var user = A.Fake<AppUser>();
+            comment = new Comment() { Id = 1, StockId = 1, Title = "Hello", Content = "Desc", CreatedAt = DateTime.Now, AppUserId = "1", CreatedBy = user };
+            comments = new List<Comment>() { comment };
         }
         [Fact]
-        public void CommentController_GetAll_ReturnsSuccess()
+        public async Task CommentController_GetAll_ReturnsSuccess()
         {
             //Arrange
-            var comments = A.Fake<List<Comment>>();
             A.CallTo(() => commentRepo.GetAllAsync()).Returns(comments);
             //Act
-            var result = commentController.GetAll();
+            var result = await commentController.GetAll();
             //Assert
-            result.Should().NotBeNull();
-            result.Should().BeOfType<Task<IActionResult>>();
+            result.ShouldNotBeNull();
+            var okResult = result.ShouldBeOfType<OkObjectResult>();
+            var dto = okResult.Value.ShouldBeOfType<List<Comment>>();
+            dto[0].Title.ShouldBe("Hello");
+            dto[0].CreatedAt.ShouldBeLessThan(DateTime.Now);
         }
 
         [Fact]
-        public void CommentController_GetbyId_ReturnsSuccess()
+        public async Task CommentController_GetbyId_ReturnsSuccess()
         {
             //Arrange
-            var comment = A.Fake<Comment>();
             int id = 1;
             A.CallTo(() => commentRepo.GetByIdAsync(id)).Returns(comment);
             //Act
-            var result = commentController.GetbyId(id);
+            var result = await commentController.GetbyId(id);
             //Assert
-            result.Should().NotBeNull();
-            result.Should().BeOfType<Task<IActionResult>>();
+            result.ShouldNotBeNull();
+            var okResult = result.ShouldBeOfType<OkObjectResult>();
+            var dto = okResult.Value.ShouldBeOfType<CommentDto>();
+
+            dto.Content.ShouldBe("Desc");
         }
 
         [Fact]
-        public void CommentController_Create_ReturnsSuccess()
+        public async Task CommentController_GetbyId_ReturnsNotFound_OnNullResponse()
         {
             //Arrange
-            var comment = A.Fake<Comment>();
+            int id = 99;
+            A.CallTo(() => commentRepo.GetByIdAsync(id)).Returns((Comment)null);
+            //Act
+            var result = await commentController.GetbyId(id);
+            //Assert
+            result.ShouldNotBeNull();
+            result.ShouldBeOfType<NotFoundResult>();
+        }
+
+        [Fact]
+        public async Task CommentController_Create_ReturnsSuccess()
+        {
+            //Arrange
             var commentCreateRequest = A.Fake<CommentCreateRequest>();
             int stockId = 1;
             A.CallTo(() => commentRepo.CreateAsync(stockId, commentCreateRequest)).Returns(comment);
             //Act
-            var result = commentController.Create(stockId, commentCreateRequest);
+            var result = await commentController.Create(stockId, commentCreateRequest);
             //Assert
-            result.Should().NotBeNull();
-            result.Should().BeOfType<Task<IActionResult>>();
+            result.ShouldNotBeNull();
+            var createdAtActionResult = result.ShouldBeOfType<CreatedAtActionResult>();
+
+            createdAtActionResult.Value.ShouldBeOfType<CommentDto>();
         }
 
         [Fact]
-        public void CommentController_Update_ReturnsSuccess()
+        public async Task CommentController_Create_ReturnsBadRequest_WhenCreationFails()
+        {
+            // Arrange
+            var request = A.Fake<CommentCreateRequest>();
+            int stockId = 1;
+            A.CallTo(() => commentRepo.CreateAsync(stockId, request)).Returns((Comment)null);
+
+            // Act
+            var result = await commentController.Create(stockId, request);
+
+            // Assert
+            result.ShouldBeOfType<BadRequestResult>();
+        }
+
+        [Fact]
+        public async Task CommentController_Update_ReturnsSuccess()
         {
             //Arrange
-            var comment = A.Fake<Comment>();
             var commentUpdateRequest = A.Fake<CommentUpdateRequest>();
             int id = 1;
             A.CallTo(() => commentRepo.UpdateAsync(id, commentUpdateRequest)).Returns(comment);
             //Act
-            var result = commentController.Update(id, commentUpdateRequest);
+            var result = await commentController.Update(id, commentUpdateRequest);
             //Assert
-            result.Should().NotBeNull();
-            result.Should().BeOfType<Task<IActionResult>>();
+            result.ShouldNotBeNull();
+            var okResult = result.ShouldBeOfType<OkObjectResult>();
+            okResult.Value.ShouldBeOfType<CommentDto>();
         }
-        
+
         [Fact]
-        public void CommentController_Delete_ReturnsSuccess()
+        public async Task CommentController_Update_ReturnsNotFound_OnNullResponse()
+        {
+            var request = A.Fake<CommentUpdateRequest>();
+            A.CallTo(() => commentRepo.UpdateAsync(1, request)).Returns((Comment)null);
+
+            var result = await commentController.Update(1, request);
+
+            result.ShouldBeOfType<NotFoundResult>();
+        }
+
+        [Fact]
+        public async Task CommentController_Delete_ReturnsSuccess()
         {
             //Arrange
-            var comment = A.Fake<Comment>();
             int id = 1;
             A.CallTo(() => commentRepo.DeleteAsync(id)).Returns(comment);
             //Act
-            var result = commentController.Delete(id);
+            var result = await commentController.Delete(id);
             //Assert
-            result.Should().NotBeNull();
-            result.Should().BeOfType<Task<IActionResult>>();
+            result.ShouldNotBeNull();
+            var okResult = result.ShouldBeOfType<OkObjectResult>();
+            okResult.Value.ShouldBeOfType<Comment>();
+        }
+
+        [Fact]
+        public async Task CommentController_Delete_ReturnsNotFound_OnNullResponse()
+        {
+            A.CallTo(() => commentRepo.DeleteAsync(1)).Returns((Comment)null);
+
+            var result = await commentController.Delete(1);
+
+            result.ShouldBeOfType<NotFoundResult>();
         }
     }
 }
